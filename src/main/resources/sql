@@ -1,0 +1,151 @@
+create table tb_state (
+	 id_state serial constraint pk_id_state primary key,
+	 name varchar(100) not null,
+	 abbreviation varchar(100) not null,
+	 UNIQUE (abbreviation)
+);
+
+INSERT INTO tb_state (name, abbreviation) values ('Acre', 'AC'), ('Alagoas', 'AL'), ('Amazonas', 'AM'), ('Amapá', 'AP'), ('Bahia', 'BA'), ('Ceará', 'CE'), ('Distrito Federal', 'DF'), ('Espírito Santo', 'ES'), ('Goiás', 'GO'), ('Maranhão', 'MA'), ('Minas Gerais', 'MG'), ('Mato Grosso do Sul', 'MS'), ('Mato Grosso', 'MT'), ('Pará', 'PA'), ('Paraíba', 'PB'), ('Pernambuco', 'PE'), ('Piauí', 'PI'), ('Paraná', 'PR'), ('Rio de Janeiro', 'RJ'), ('Rio Grande do Norte', 'RN'), ('Rondônia', 'RO'), ('Roraima', 'RR'), ('Rio Grande do Sul', 'RS'), ('Santa Catarina', 'SC'), ('Sergipe', 'SE'), ('São Paulo', 'SP'), ('Tocantins', 'TO');
+
+
+
+create table TB_PROFILE (
+	 id_profile serial constraint pk_id_profile primary key,
+	 type varchar not null,
+	 description varchar not null,
+	    UNIQUE (type)
+);
+
+INSERT INTO public.tb_profile ("type", description) VALUES('MANAGER', 'Gestor de aprovacao');
+INSERT INTO public.tb_profile ("type", description) VALUES('COMPANY', 'Instituicao parceira');
+INSERT INTO public.tb_profile ("type", description) VALUES('INDIVIDUAL', 'Voluntario');
+
+create table TB_ADDRESS (
+	 id_address serial constraint pk_id_address primary key,
+	 cep varchar not null,
+	 street varchar not null,
+	 neighborhood varchar not null,
+	 complement varchar,
+	 number integer not null,
+	id_state integer not null,
+    city varchar not null,
+	  	CONSTRAINT fk_state
+      	FOREIGN KEY("id_state")
+	  	REFERENCES TB_STATE("id_state")
+);
+
+create table TB_USER (
+	 id_user serial constraint pk_id_user primary key,
+	 id_address integer not null,
+	 name varchar not null,
+	 email varchar not null,
+	 document varchar not null,
+	 password varchar not null,
+	 type varchar not null,
+	 creation_date timestamp not null,
+	 active boolean not null,
+	 UNIQUE (document),
+	 UNIQUE (email),
+	  	CONSTRAINT fk_profile
+      	FOREIGN KEY("type")
+	  	REFERENCES TB_PROFILE("type"),
+        CONSTRAINT fk_address_user
+        FOREIGN KEY("id_address")
+        REFERENCES TB_ADDRESS("id_address")
+);
+
+create table TB_USER_IMAGE (
+ 	 id serial constraint pk_id_image_user primary key,
+	 id_user integer not null,
+	 title varchar not null,
+	 "image" bytea not null,
+	  	CONSTRAINT fk_iuser
+      	FOREIGN KEY("id_user")
+	  	REFERENCES TB_USER("id_user")
+);
+
+create table TB_INDIVIDUAL (
+	 id_user integer constraint pk_id_individual primary key  REFERENCES tb_user (id_user),
+	 OCUPATION varchar not null
+);
+
+create table TB_COMPANY (
+	 id_user integer constraint pk_id_compnay primary key  REFERENCES tb_user (id_user),
+	 OCUPATION_AREA varchar not null,
+	 DESCRIPTION varchar not null
+
+);
+
+create table TB_MANAGER (
+	 id_manager integer constraint pk_id_manager primary key  REFERENCES tb_manager (id_manager)
+);
+
+create table TB_PHONE (
+ 	 id serial constraint pk_id_phone primary key,
+	 id_user integer not null,
+	 ddd integer not null,
+	 number integer not null,
+	  	CONSTRAINT fk_user_phone
+      	FOREIGN KEY("id_user")
+	  	REFERENCES TB_USER("id_user")
+);
+
+create table TB_JOB (
+ 	 id_job serial constraint pk_id_job primary key,
+	 id_user integer not null,
+	 type varchar not null,
+	 title varchar not null,
+	 description varchar not null,
+	 date_initial timestamp not null,
+	 date_final timestamp,
+	 id_state integer not null,
+	 active boolean not null,
+     city varchar not null,
+     	CONSTRAINT fk_state_job
+        FOREIGN KEY("id_state")
+     	REFERENCES TB_STATE("id_state"),
+	  	CONSTRAINT fk_ujob_ser
+      	FOREIGN KEY("id_user")
+	  	REFERENCES TB_USER("id_user")
+);
+
+create table TB_JOB_IMAGE (
+ 	 id serial constraint pk_id_image_job primary key,
+	 id_job integer not null,
+	 title varchar not null,
+	 "image" bytea not null,
+	  	CONSTRAINT fk_ijob
+      	FOREIGN KEY("id_job")
+	  	REFERENCES TB_JOB("id_job")
+);
+
+create table TB_SUBSCRIPTION (
+ 	 id_subscription serial constraint pk_id_subscription primary key,
+	 id_individual integer not null,
+	 id_job integer not null,
+	 id_company integer not null,
+	 active boolean not null,
+	 date_creation timestamp not null,
+     	CONSTRAINT fk_job_subscription
+        FOREIGN KEY("id_job")
+     	REFERENCES TB_JOB("id_job"),
+	  	CONSTRAINT fk_user_subscription
+      	FOREIGN KEY("id_individual")
+	  	REFERENCES TB_INDIVIDUAL("id_user"),
+	  	CONSTRAINT fk_company_subscription
+      	FOREIGN KEY("id_company")
+	  	REFERENCES TB_COMPANY("id_user")
+);
+
+
+INSERT INTO public.tb_address
+(cep, id_state, city, street, neighborhood, complement, "number")
+VALUES('', 2, '', '', '', '', 0);
+
+select * from tb_address;
+
+
+INSERT INTO public.tb_user ("name", email, "document", "password", type, creation_date, id_address, active )
+	VALUES('leticia', 'manager@teste.com', '123', '$2a$10$p1l.dThl.VXEW3Gx.N.M9Ov0OZx7DswfX3hGZcqL6Ue7OXt8A/jcG', 'MANAGER', current_date, 1, true);
+
+INSERT INTO public.tb_manager (id_manager) VALUES(1);
